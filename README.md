@@ -1,50 +1,77 @@
-# React + TypeScript + Vite
+# MeetGo 프로젝트
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+MeetGo는 누구나 쉽게 모임을 생성하고 참여할 수 있는 모임 일정 조율 서비스입니다.
 
-Currently, two official plugins are available:
+## MeetGo 핵심 기능
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. 모임 생성 및 일정 투표
 
-## Expanding the ESLint configuration
+- 모임명, 목적, 예상 소요 시간 설정
+- 후보 날짜/시간대 등록
+- 참석자별 가능 시간 체크 (복수 선택 가능)
+- 실시간 참여 현황 확인
+- 최종 확정된 일정 알림
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+2. 스마트 일정 추천
 
-- Configure the top-level `parserOptions` property like this:
+- 참석자들의 선호도 기반 최적 일정 자동 계산
+- 주말/평일 선호도 반영
+- 점심/저녁 등 시간대별 선호도 반영
+- 참석률이 높은 순서대로 일정 추천
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-});
+3. 장소 관리
+
+- 모임 장소 추천 및 투표
+- 카카오맵 연동으로 위치 정보 제공
+- 예상 소요 시간 계산
+- 대중교통/자차 경로 안내
+- 주변 주차장 정보
+
+4. 공유 및 알림
+
+- 카카오톡 공유 링크 생성
+- 구글/애플 캘린더 연동
+- 일정 확정/변경 시 알림
+- 모임 전날 리마인더
+- 불참/지각 알림 관리
+
+## 차별화 포인트:
+
+- 로그인 없이 링크로 즉시 참여 가능
+- 모바일 최적화 UI/UX
+- 직관적인 달력/시간 선택 인터페이스
+- 실시간 업데이트로 빠른 피드백
+
+## 기술 스택:
+
+- Frontend: Next.js + TypeScript
+- Server: Firebase
+- 스타일링: Tailwind CSS + shadcn/ui
+- 상태관리: Zustand
+- 캘린더: FullCalendar
+- 지도: 카카오맵 API
+- 배포: Vercel
+
+## Commit
+
+### Commit 순서
+
+```
+git add .
+git commit -m "커밋 메시지"
+git branch -M main
+git push -u origin main
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+### Commit 메시지 작성법
 
-```js
-// eslint.config.js
-import react from "eslint-plugin-react";
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: "18.3" } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs["jsx-runtime"].rules,
-  },
-});
-```
+feat : 새로운 기능 추가, 기존의 기능을 요구 사항에 맞추어 수정
+fix : 기능에 대한 버그 수정
+build : 빌드 관련 수정
+chore : 패키지 매니저 수정, 그 외 기타 수정 ex) .gitignore
+ci : CI 관련 설정 수정
+docs : 문서(주석) 수정
+style : 코드 스타일, 포맷팅에 대한 수정
+refactor : 기능의 변화가 아닌 코드 리팩터링 ex) 변수 이름 변경
+test : 테스트 코드 추가/수정
+release : 버전 릴리즈
