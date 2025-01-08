@@ -2,7 +2,7 @@
 
 MeetGo는 누구나 쉽게 모임을 생성하고 참여할 수 있는 모임 일정 조율 서비스입니다.
 
-## MeetGo 핵심 기능
+## 1. MeetGo의 핵심 기능
 
 1. 모임 생성 및 일정 투표
 
@@ -35,14 +35,14 @@ MeetGo는 누구나 쉽게 모임을 생성하고 참여할 수 있는 모임 �
 - 모임 전날 리마인더
 - 불참/지각 알림 관리
 
-## 차별화 포인트:
+## 2. MeetGo의 차별화 포인트
 
 - 로그인 없이 링크로 즉시 참여 가능
 - 모바일 최적화 UI/UX
 - 직관적인 달력/시간 선택 인터페이스
 - 실시간 업데이트로 빠른 피드백
 
-## 기술 스택:
+## 3. MeetGo의 기술 스택
 
 - Frontend: Next.js + TypeScript
 - Server: Firebase
@@ -52,7 +52,7 @@ MeetGo는 누구나 쉽게 모임을 생성하고 참여할 수 있는 모임 �
 - 지도: 카카오맵 API
 - 배포: Vercel
 
-## Commit
+## How to Commit
 
 ### Commit 순서
 
@@ -65,13 +65,13 @@ git push -u origin main
 
 ### Commit 메시지 작성법
 
-feat : 새로운 기능 추가, 기존의 기능을 요구 사항에 맞추어 수정
-fix : 기능에 대한 버그 수정
-build : 빌드 관련 수정
-chore : 패키지 매니저 수정, 그 외 기타 수정 ex) .gitignore
-ci : CI 관련 설정 수정
-docs : 문서(주석) 수정
-style : 코드 스타일, 포맷팅에 대한 수정
-refactor : 기능의 변화가 아닌 코드 리팩터링 ex) 변수 이름 변경
-test : 테스트 코드 추가/수정
-release : 버전 릴리즈
+- feat : 새로운 기능 추가, 기존의 기능을 요구 사항에 맞추어 수정
+- fix : 기능에 대한 버그 수정
+- build : 빌드 관련 수정
+- chore : 패키지 매니저 수정, 그 외 기타 수정 ex) .gitignore
+- ci : CI 관련 설정 수정
+- docs : 문서(주석) 수정
+- style : 코드 스타일, 포맷팅에 대한 수정
+- refactor : 기능의 변화가 아닌 코드 리팩터링 ex) 변수 이름 변경
+- test : 테스트 코드 추가/수정
+- release : 버전 릴리즈
