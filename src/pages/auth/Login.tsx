@@ -51,7 +51,7 @@ export default function Login() {
 
   return (
     <div className="w-screen h-screen flex flex-col justify-center items-center">
-      <div className="mb-10">로그인</div>
+      <div className="mb-10 font-bold text-xl">로그인</div>
       <form
         className="w-1/2 h-[300px] flex flex-col gap-3"
         onSubmit={handleSubmit}
@@ -78,7 +78,11 @@ export default function Login() {
             required
           />
         </div>
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {error && (
+          <p className="text-red-500 text-sm ">
+            이메일과 비밀번호를 확인해주세요.
+          </p>
+        )}
         <Button
           type="submit"
           className="bg-third text-primary"
