@@ -4,8 +4,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { Label } from "@/components/ui/label";
 import { useMemo, useState } from "react";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth, storage } from "@/firebase";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { auth, db, storage } from "@/firebase";
+import {
+  deleteObject,
+  getDownloadURL,
+  ref,
+  uploadBytes,
+} from "firebase/storage";
+import { Timestamp, doc, setDoc } from "firebase/firestore";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -19,6 +25,7 @@ export default function Signup() {
     phoneNumber: "",
     birthday: "",
     checkbox: false,
+    // createdAt: number,
   });
 
   const [error, setError] = useState("");
@@ -92,6 +99,7 @@ export default function Signup() {
     setError("");
 
     try {
+      // 1. Firebase Authentication으로 사용자 생성
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         formData.email,
@@ -99,7 +107,12 @@ export default function Signup() {
       );
       const user = userCredential.user;
 
+      if (!user) {
+        throw new Error("사용자 생성에 실패했습니다.");
+      }
+
       let photoURL = "";
+      // 2. 프로필 사진 업로드 (성공 시 URL 반환)
       if (formData.imageFile) {
         const imageRef = ref(
           storage,
@@ -109,15 +122,47 @@ export default function Signup() {
         photoURL = await getDownloadURL(imageRef);
       }
 
+      // 3. Firebase Authentication 프로필 업데이트
       await updateProfile(user, {
         displayName: formData.name,
         photoURL: photoURL,
+      });
+
+      // 4. 추가 데이터 Firestore에 저장 (예: 이름, 전화번호 등)
+      await setDoc(doc(db, "users", user.uid), {
+        name: formData.name,
+        gender: formData.gender,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        birthday: formData.birthday,
+        photoURL: photoURL,
+        createdAt: Timestamp.now(),
       });
 
       navigate("/");
     } catch (err) {
       setError("회원가입에 실패했습니다. 다시 시도해주세요.");
       console.error(err);
+
+      if (auth.currentUser) {
+        // 1. 생성된 사용자 계정 삭제
+        await auth.currentUser.delete();
+
+        // 2. 업로드된 프로필 사진 삭제
+        if (formData.imageFile) {
+          const imageRef = ref(
+            storage,
+            `profile/${auth.currentUser.uid}/${formData.imageFile.name}`
+          );
+          try {
+            await deleteObject(imageRef);
+          } catch (deleteError) {
+            console.error("파일 삭제 실패:", deleteError);
+          }
+        }
+      }
+    } finally {
+      setLoading(false);
     }
   };
 

@@ -26,6 +26,6 @@ export const auth = getAuth(app);
 
 export const storage = getStorage(app);
 
-export const firestore = getFirestore(app);
+export const db = getFirestore(app);
 
 export const kakaoprovider = new OAuthProvider("oidc.kakao");
