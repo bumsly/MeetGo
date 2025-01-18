@@ -7,12 +7,13 @@ import Signup from "./pages/auth/Signup";
 import NavigationTop from "./components/NavigationTop";
 import NavigationBottom from "./components/NavigationBottom";
 import MyMeeting from "./pages/user/MyMeeting";
-import Profile from "./pages/user/Profile";
+import MyPage from "./pages/user/MyPage";
 import MeetingNew from "./pages/meeting/MeetingNew";
 import MeetingEdit from "./pages/meeting/MeetingEdit";
 import MeetingDetail from "./pages/meeting/MeetingDetail";
 import MeetingResult from "./pages/meeting/MeetingResult";
 import { AuthProvider } from "./contexts/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function Layout() {
   const location = useLocation();
@@ -30,7 +31,14 @@ function Layout() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/mymeeting" element={<MyMeeting />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route
+          path="/mypage"
+          element={
+            <ProtectedRoute>
+              <MyPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/meetingnew" element={<MeetingNew />} />
         <Route path="/meetingedit" element={<MeetingEdit />} />
         <Route path="/meetingdetail" element={<MeetingDetail />} />

@@ -11,7 +11,7 @@ import {
   ref,
   uploadBytes,
 } from "firebase/storage";
-import { Timestamp, doc, setDoc } from "firebase/firestore";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -25,7 +25,6 @@ export default function Signup() {
     phoneNumber: "",
     birthday: "",
     checkbox: false,
-    // createdAt: number,
   });
 
   const [error, setError] = useState("");
@@ -136,7 +135,7 @@ export default function Signup() {
         phoneNumber: formData.phoneNumber,
         birthday: formData.birthday,
         photoURL: photoURL,
-        createdAt: Timestamp.now(),
+        createdAt: serverTimestamp(),
       });
 
       navigate("/");
