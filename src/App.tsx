@@ -8,6 +8,7 @@ import NavigationTop from "./components/NavigationTop";
 import NavigationBottom from "./components/NavigationBottom";
 import MyMeeting from "./pages/user/MyMeeting";
 import MyPage from "./pages/user/MyPage";
+import Settings from "./pages/Settings";
 import MeetingNew from "./pages/meeting/MeetingNew";
 import MeetingEdit from "./pages/meeting/MeetingEdit";
 import MeetingDetail from "./pages/meeting/MeetingDetail";
@@ -39,6 +40,7 @@ function Layout() {
             </ProtectedRoute>
           }
         />
+        <Route path="/settings" element={<Settings />} />
         <Route path="/meetingnew" element={<MeetingNew />} />
         <Route path="/meetingedit" element={<MeetingEdit />} />
         <Route path="/meetingdetail" element={<MeetingDetail />} />

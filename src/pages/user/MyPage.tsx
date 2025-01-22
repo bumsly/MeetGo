@@ -70,14 +70,14 @@ export default function MyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 mt-1/10">
-      <div className="max-w-2xl mx-auto bg-white rounded-lg shadow p-8 mt-5">
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-2xl mx-auto bg-white rounded-lg shadow p-8 mt-10">
         <div className="flex items-center space-x-6">
           {user.photoURL && (
             <img
               src={user.photoURL}
               alt="프로필 사진"
-              className="w-24 h-24 rounded-full object-cover"
+              className="w-24 h-24 rounded-full object-cover border"
             />
           )}
           <div>
@@ -91,7 +91,7 @@ export default function MyPage() {
             <h2 className="text-lg font-semibold mb-2">계정 정보</h2>
             <p>이메일: {user.email}</p>
             <p>
-              가입일:
+              가입일:{" "}
               {createdAtDate ? formatDate(createdAtDate) : "데이터 없음"}
             </p>
             <p>
@@ -104,9 +104,9 @@ export default function MyPage() {
             <p>
               전화번호:{" "}
               {userData?.phoneNumber.slice(0, 3) +
-                " - " +
+                "-" +
                 userData?.phoneNumber.slice(3, 7) +
-                " - " +
+                "-" +
                 userData?.phoneNumber.slice(7, 11)}
             </p>
           </div>
