@@ -9,12 +9,12 @@ export default function NavigationTop() {
 
   return (
     <>
-      <div className="w-full h-[80px] flex p-5 bg-secondary-dark rounded-b-xl items-center fixed  z-40">
-        <span className="w-1/2 text-white text-xl">Meetgo</span>
+      <div className="w-full h-[80px] flex p-5 rounded-b-xl items-center fixed z-40 border-b rounded-t-xl bg-gray-100">
+        <span className="w-1/2 text-lg">Meetgo</span>
 
         <div className="w-1/2 flex justify-end gap-5">
           <Link to="/Search">
-            <span className="text-white">
+            <span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -31,7 +31,7 @@ export default function NavigationTop() {
               </svg>
             </span>
           </Link>
-          <button className="text-white" onClick={() => setIsOpen(true)}>
+          <button onClick={() => setIsOpen(true)}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"

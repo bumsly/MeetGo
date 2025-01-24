@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 export default function NavigationBottom() {
   return (
-    <div className="w-full h-[80px] flex p-3 border-t rounded-t-xl flex items-center fixed bottom-0">
+    <div className="w-full h-[80px] flex p-3 border-t rounded-t-xl flex items-center fixed bottom-0 bg-gray-100">
       <div className="w-full flex items-center">
         <span className="w-1/5 flex justify-center">
           <Link to="/">

@@ -41,10 +41,10 @@ function Layout() {
           }
         />
         <Route path="/settings" element={<Settings />} />
-        <Route path="/meetingnew" element={<MeetingNew />} />
-        <Route path="/meetingedit" element={<MeetingEdit />} />
-        <Route path="/meetingdetail" element={<MeetingDetail />} />
-        <Route path="/meetingresult" element={<MeetingResult />} />
+        <Route path="/create-meeting" element={<MeetingNew />} />
+        <Route path="/edit-meeting" element={<MeetingEdit />} />
+        <Route path="/meeting-detail" element={<MeetingDetail />} />
+        <Route path="/meeting-result" element={<MeetingResult />} />
       </Routes>
       {showNavi && <NavigationBottom />}
     </AuthProvider>
