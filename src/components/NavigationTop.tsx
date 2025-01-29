@@ -9,8 +9,8 @@ export default function NavigationTop() {
 
   return (
     <>
-      <div className="w-full h-[80px] flex p-5 rounded-b-xl items-center fixed z-40 border-b rounded-t-xl bg-gray-100">
-        <span className="w-1/2 text-lg">Meetgo</span>
+      <div className="w-full h-[80px] flex p-5 rounded-b-xl items-center fixed z-40 border-b bg-gray-100">
+        <span className="w-1/2 text-lg font-bold">MeetGo</span>
 
         <div className="w-1/2 flex justify-end gap-5">
           <Link to="/Search">

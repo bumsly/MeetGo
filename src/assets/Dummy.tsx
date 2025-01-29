@@ -1,0 +1,48 @@
+// 더미 데이터 (실제로는 API에서 가져올 데이터)
+export const dummy = [
+  {
+    id: 1,
+    title: "팀 프로젝트 회의",
+    date: "2024.02.15",
+    time: "14:00",
+    location: "온라인 회의",
+    participants: 5,
+    status: "투표 진행중",
+  },
+  {
+    id: 2,
+    title: "친구들과 번개 모임",
+    date: "2024.02.20",
+    time: "19:00",
+    location: "강남 카페",
+    participants: 4,
+    status: "일정 조율중",
+  },
+  {
+    id: 3,
+    title: "동아리 정기 모임",
+    date: "2024.02.25",
+    time: "18:00",
+    location: "학교 세미나실",
+    participants: 6,
+    status: "확정",
+  },
+  {
+    id: 4,
+    title: "프로젝트 중간 보고회",
+    date: "2024.03.01",
+    time: "15:30",
+    location: "회의실",
+    participants: 7,
+    status: "투표 예정",
+  },
+  {
+    id: 5,
+    title: "친목 모임",
+    date: "2024.03.10",
+    time: "20:00",
+    location: "강릉 펜션",
+    participants: 8,
+    status: "일정 조율중",
+  },
+];
