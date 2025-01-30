@@ -32,7 +32,7 @@ export default function Home() {
 
   return (
     <div className="h-screen">
-      <div className="h-screen bg-gray-100 pt-24 flex flex-col">
+      <div className="h-full bg-gray-100 pt-24 flex flex-col">
         {/* 빠른 액션 버튼들 */}
         <div className="grid grid-cols-3 gap-4 mb-6 px-4">
           <QuickActionButton
