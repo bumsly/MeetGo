@@ -1,9 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Users, PlusCircle, Clock } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { dummy } from "@/assets/Dummy";
 import MeetingCard from "@/components/MeetingCard";
+import { Timestamp, collection, getDocs } from "firebase/firestore";
+import { db } from "@/firebase";
+
+interface Meeting {
+  id: string;
+  title: string;
+  date: string;
+}
 
 const QuickActionButton = ({ icon, title, to }: any) => (
   <Link
@@ -17,6 +24,7 @@ const QuickActionButton = ({ icon, title, to }: any) => (
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("upcoming");
+  const [meetings, setMeetings] = useState<Meeting[]>([]);
 
   const handleCreateMeeting = () => {
     console.log("새 모임 만들기");
@@ -29,6 +37,41 @@ export default function Home() {
   const handleRecentMeetings = () => {
     console.log("최근 모임");
   };
+
+  const now = new Date();
+
+  // 📌 모임 필터링 (예정된 모임 / 지난 모임)
+  const upcomingMeetings = meetings.filter(
+    (meeting) => new Date(meeting.date) >= now
+  );
+  const pastMeetings = meetings.filter(
+    (meeting) => new Date(meeting.date) < now
+  );
+
+  useEffect(() => {
+    const fetchMeetings = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "meetings"));
+        const meetingsData: Meeting[] = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+
+          return {
+            id: doc.id,
+            title: data.title,
+            date:
+              data.date instanceof Timestamp
+                ? data.date.toDate().toISOString()
+                : data.date,
+          };
+        });
+        setMeetings(meetingsData);
+      } catch (error) {
+        console.error("Error fetching meetings:", error);
+      }
+    };
+
+    fetchMeetings();
+  }, []);
 
   return (
     <div className="h-screen">
@@ -80,8 +123,8 @@ export default function Home() {
         <div className="flex-1 px-4 overflow-hidden pb-[80px]">
           <ScrollArea className="h-full overflow-y-auto pr-2">
             {activeTab === "upcoming" ? (
-              dummy.length > 0 ? (
-                dummy.map((meeting: any) => (
+              upcomingMeetings.length > 0 ? (
+                upcomingMeetings.map((meeting) => (
                   <MeetingCard key={meeting.id} meeting={meeting} />
                 ))
               ) : (
@@ -89,11 +132,27 @@ export default function Home() {
                   예정된 모임이 없습니다.
                 </div>
               )
+            ) : pastMeetings.length > 0 ? (
+              pastMeetings.map((meeting) => (
+                <MeetingCard key={meeting.id} meeting={meeting} />
+              ))
             ) : (
               <div className="text-center text-gray-500 py-8">
                 지난 모임이 없습니다.
               </div>
             )}
+
+            {/* {meetings.length > 0 ? (
+               meetings.map((meeting: Meeting) => (
+                 <MeetingCard key={meeting.id} meeting={meeting} />
+               ))
+             ) : (
+               <div className="text-center text-gray-500 py-8">
+                 {activeTab === "upcoming"
+                   ? "예정된 모임이 없습니다."
+                   : "지난 모임이 없습니다."}
+               </div>
+            )} */}
           </ScrollArea>
         </div>
       </div>
