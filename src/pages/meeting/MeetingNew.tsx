@@ -77,7 +77,7 @@ const MeetingNew = () => {
       });
 
       alert("모임이 성공적으로 생성되었습니다!");
-      navigate(`/meeting-detail/${meetingRef.id}`);
+      navigate(`/meeting/${meetingRef.id}`);
     } catch (error) {
       console.error("모임 생성 에러:", error);
       alert("모임 생성 중 오류가 발생했습니다. 다시 시도해주세요.");

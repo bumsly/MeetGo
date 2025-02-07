@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 export default function MeetingCard({ meeting }: any) {
   return (
     <div className="bg-white p-4 rounded-lg shadow-md mb-4">
-      <Link to={`/meeting-detail/${meeting.id}`} className="block">
+      <Link to={`/meeting/${meeting.id}`} className="block">
         <div className="flex justify-between items-center mb-2">
           <h3 className="font-bold text-lg">{meeting.title}</h3>
           <span className="text-sm text-blue-600">{meeting.status}</span>
