@@ -13,39 +13,8 @@ import { db } from "@/firebase";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, Clock, MapPin, Users } from "lucide-react";
-
-interface User {
-  uid: string;
-  email: string | null;
-  displayName: string | null;
-}
-
-interface participant {
-  uid: string;
-  email: string | null;
-  displayName: string | null;
-  role: "host" | "participant";
-  joinedAt: Date;
-}
-
-interface Meeting {
-  id: string;
-  title: string;
-  date: Timestamp;
-  location: string;
-  description: string;
-  deadline: Timestamp;
-  isVoteEnabled: boolean;
-  invitees: User[];
-  createdAt: Timestamp;
-  createdBy: {
-    uid: string;
-    email: string | null;
-    displayName: string | null;
-  };
-  participants: participant[];
-}
+import { Calendar, MapPin, Users } from "lucide-react";
+import { Meeting, Participant } from "@/types/meeting";
 
 interface MeetingFirestore extends Omit<Meeting, "id"> {
   // Firebase 문서의 타입
@@ -101,17 +70,12 @@ const MeetingDetail: React.FC = () => {
     }
 
     try {
-      const newParticipant = {
+      const newParticipant: Participant = {
         uid: user.uid,
         email: user.email,
         displayName: user.displayName || "익명",
-        role: "participant" as "participant",
-        joinedAt: new Date(),
-      };
-
-      const firestoreParticipant = {
-        ...newParticipant,
-        joinedAt: Timestamp.fromDate(newParticipant.joinedAt),
+        role: "participant",
+        joinedAt: Timestamp.now(),
       };
 
       await updateDoc(doc(db, "meetings", meeting.id), {
@@ -141,11 +105,6 @@ const MeetingDetail: React.FC = () => {
         (p: any) => p.uid === user.uid
       );
       if (!participant) return;
-
-      const firestorePariticipant = {
-        ...participant,
-        joinedAt: Timestamp.fromDate(participant.joinedAt),
-      };
 
       await updateDoc(doc(db, "meetings", meeting.id), {
         participants: arrayRemove(participant),
