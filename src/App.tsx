@@ -43,9 +43,9 @@ function Layout() {
         />
         <Route path="/settings" element={<Settings />} />
         <Route path="/create-meeting" element={<MeetingNew />} />
-        <Route path="/edit-meeting/:id" element={<MeetingEdit />} />
         <Route path="/meeting/:id" element={<MeetingDetail />} />
-        <Route path="/meeting-result/:id" element={<MeetingResult />} />
+        <Route path="/meeting/:id/edit" element={<MeetingEdit />} />
+        <Route path="/meeting/:id/result" element={<MeetingResult />} />
         <Route path="/notification" element={<Notification />} />
       </Routes>
       {showNavi && <NavigationBottom />}

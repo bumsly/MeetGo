@@ -150,7 +150,7 @@ const MeetingDetail: React.FC = () => {
             {isHost && (
               <Button
                 variant="outline"
-                onClick={() => navigate(`/meetings/${id}/edit`)}
+                onClick={() => navigate(`/meeting/${id}/edit`)}
               >
                 수정
               </Button>
