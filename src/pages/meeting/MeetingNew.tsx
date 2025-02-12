@@ -50,6 +50,12 @@ const MeetingNew = () => {
       return;
     }
 
+    // 본인 이메일 추가 불가능
+    if (inviteEmail === user?.email) {
+      setEmailError("본인의 이메일은 초대할 수 없습니다.");
+      return;
+    }
+
     try {
       const usersRef = collection(db, "users");
       const q = query(usersRef, where("email", "==", inviteEmail));
