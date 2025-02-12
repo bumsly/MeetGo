@@ -7,9 +7,19 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Timestamp, addDoc, collection, doc, setDoc } from "firebase/firestore";
-import { db } from "@/firebase";
+import {
+  Timestamp,
+  addDoc,
+  collection,
+  doc,
+  getDocs,
+  query,
+  setDoc,
+  where,
+} from "firebase/firestore";
+import { auth, db } from "@/firebase";
 import { useAuth } from "@/contexts/AuthContext";
+import { fetchSignInMethodsForEmail } from "firebase/auth";
 
 const MeetingNew = () => {
   const navigate = useNavigate();
@@ -23,8 +33,57 @@ const MeetingNew = () => {
     description: "",
     deadline: new Date(),
     isVoteEnabled: false,
-    invitees: [],
+    invitees: [] as string[],
   });
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
+
+  const handleInvite = async () => {
+    if (!inviteEmail) {
+      setEmailError("이메일을 입력해주세요");
+      return;
+    }
+
+    // 이메일 형식 검사
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(inviteEmail)) {
+      setEmailError("이메일 형식이 정확하지 않습니다.");
+      return;
+    }
+
+    try {
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, where("email", "==", inviteEmail));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        setEmailError("해당 이메일로 등록된 유저가 없습니다.");
+        return;
+      }
+
+      if (formData.invitees.includes(inviteEmail)) {
+        setEmailError("이미 초대된 이메일입니다.");
+        return;
+      }
+
+      setFormData({
+        ...formData,
+        invitees: [...formData.invitees, inviteEmail],
+      });
+      setInviteEmail("");
+      setEmailError("");
+    } catch (error) {
+      console.log("이메일 조회 에러:", error);
+      setEmailError("이메일 조회 중에 오류가 발생했습니다.");
+    }
+  };
+
+  const handleRemoveInvitee = (email: string) => {
+    setFormData({
+      ...formData,
+      invitees: formData.invitees.filter((invitee) => invitee !== email),
+    });
+  };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -199,12 +258,39 @@ const MeetingNew = () => {
             <div className="space-y-2">
               <Label>참여자 초대</Label>
               <div className="flex space-x-2">
-                <Input placeholder="이메일 주소 입력" className="flex-1" />
-                <Button type="button" variant="outline">
+                <Input
+                  placeholder="이메일 주소 입력"
+                  className="flex-1"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                />
+                <Button type="button" variant="outline" onClick={handleInvite}>
                   추가
                 </Button>
               </div>
-              {/* 초대된 참여자 목록이 여기에 표시될 예정 */}
+              {emailError && (
+                <p className="text-sm text-red-500">{emailError}</p>
+              )}
+
+              {/* 초대된 참여자 목록 */}
+              <div className="space-y-2">
+                {formData.invitees.map((email) => (
+                  <div
+                    key={email}
+                    className="flex items-center justify-between p-2 border rounded-md"
+                  >
+                    <span>{email}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemoveInvitee(email)}
+                    >
+                      삭제
+                    </Button>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* 제출 버튼 */}
