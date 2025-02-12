@@ -8,12 +8,13 @@ import {
   arrayUnion,
   arrayRemove,
   Timestamp,
+  deleteDoc,
 } from "firebase/firestore";
 import { db } from "@/firebase";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, MapPin, Users } from "lucide-react";
+import { Calendar, MapPin, Users, UserPlus } from "lucide-react";
 import { Meeting, Participant } from "@/types/meeting";
 
 interface MeetingFirestore extends Omit<Meeting, "id"> {
@@ -129,6 +130,23 @@ const MeetingDetail: React.FC = () => {
     }
   };
 
+  const handleDeleteMeeting = async () => {
+    if (!window.confirm("정말 이 모임을 삭제하시겠습니까?")) return;
+
+    try {
+      if (!meeting || !meeting.id) return;
+
+      const docRef = doc(db, "meetings", meeting.id);
+      await deleteDoc(docRef);
+
+      alert("모임이 삭제되었습니다.");
+      navigate("/");
+    } catch (error) {
+      console.error("모임 삭제 중 오류 발생:", error);
+      alert("모임 삭제에 실패했습니다.");
+    }
+  };
+
   if (loading || error || !meeting) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -142,118 +160,128 @@ const MeetingDetail: React.FC = () => {
   const meetingDate = meeting.date.toDate();
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl pt-24">
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle className="text-2xl font-bold">
-              {meeting.title}
-            </CardTitle>
-            {isHost && (
-              <Button
-                variant="outline"
-                onClick={() => navigate(`/meeting/${id}/edit`)}
-              >
-                수정
-              </Button>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* 기본 정보 */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Calendar className="w-5 h-5" />
-              <span>
-                {meetingDate.toLocaleDateString("ko-KR", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </span>
-              <span>
-                {meetingDate.toLocaleTimeString("ko-KR", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <MapPin className="w-5 h-5" />
-              <span>{meeting.location}</span>
-            </div>
-          </div>
-
-          {/* 주최자 정보 */}
-          <div className="flex items-center space-x-3">
-            <Avatar>
-              <AvatarFallback className="bg-yellow-500 pt-1">
-                {meeting.createdBy.displayName
-                  ? meeting.createdBy.displayName[0]
-                  : "익명"}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="font-semibold">{meeting.createdBy.displayName}</p>
-              <p className="text-sm text-gray-500">주최자</p>
-            </div>
-          </div>
-
-          {/* 참여자 목록 */}
-          <div className="space-y-3">
-            <div className="flex items-center space-x-2">
-              <Users className="w-5 h-5" />
-              <h3 className="font-semibold">
-                참여자 ({meeting.participants.length}명)
-              </h3>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {meeting.participants.map((participant) => (
-                <div
-                  key={participant.uid}
-                  className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"
-                >
-                  <span className="text-sm">{participant.displayName}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* 초대 받은 사람 목록 */}
-          <div className="space-y-3">
-            <div className="flex items-center space-x-2">
-              <Users className="w-5 h-5" />
-              <h3 className="font-semibold">
-                초대 수락 대기중 ({meeting.invitees.length}명)
-              </h3>
-            </div>
-          </div>
-
-          {/* 참여/취소 버튼 */}
-          {!isHost && (
-            <div className="flex justify-center pt-4">
-              {isParticipant ? (
+    <div>
+      <div className="container mx-auto p-4 max-w-4xl pt-24">
+        <Card>
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-2xl font-bold">
+                {meeting.title}
+              </CardTitle>
+              {isHost && (
                 <Button
                   variant="outline"
-                  onClick={handleLeaveMeeting}
-                  className="w-full max-w-md"
+                  onClick={() => navigate(`/meeting/${id}/edit`)}
                 >
-                  참여 취소하기
-                </Button>
-              ) : (
-                <Button onClick={handleJoinMeeting} className="w-full max-w-md">
-                  참여하기
+                  수정
                 </Button>
               )}
             </div>
-          )}
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* 기본 정보 */}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Calendar className="w-5 h-5" />
+                <span>
+                  {meetingDate.toLocaleDateString("ko-KR", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </span>
+                <span>
+                  {meetingDate.toLocaleTimeString("ko-KR", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <MapPin className="w-5 h-5" />
+                <span>{meeting.location}</span>
+              </div>
+            </div>
 
-          {/* 모임 설명 */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <p>{meeting.description}</p>
-          </div>
-        </CardContent>
-      </Card>
+            {/* 주최자 정보 */}
+            <div className="flex items-center space-x-3">
+              <Avatar>
+                <AvatarFallback className="bg-yellow-500 pt-1">
+                  {meeting.createdBy.displayName
+                    ? meeting.createdBy.displayName[0]
+                    : "익명"}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-semibold">{meeting.createdBy.displayName}</p>
+                <p className="text-sm text-gray-500">주최자</p>
+              </div>
+            </div>
+
+            {/* 참여자 목록 */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <Users className="w-5 h-5" />
+                <h3 className="font-semibold">
+                  참여자 ({meeting.participants.length}명)
+                </h3>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {meeting.participants.map((participant) => (
+                  <div
+                    key={participant.uid}
+                    className="flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1"
+                  >
+                    <span className="text-sm">{participant.displayName}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 초대 받은 사람 목록 */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <UserPlus className="w-5 h-5" />
+                <h3 className="font-semibold">
+                  초대 대기중 ({meeting.invitees.length}명)
+                </h3>
+              </div>
+            </div>
+
+            {/* 참여/취소 버튼 */}
+            {!isHost && (
+              <div className="flex justify-center pt-4">
+                {isParticipant ? (
+                  <Button
+                    variant="outline"
+                    onClick={handleLeaveMeeting}
+                    className="w-full max-w-md"
+                  >
+                    참여 취소하기
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleJoinMeeting}
+                    className="w-full max-w-md"
+                  >
+                    참여하기
+                  </Button>
+                )}
+              </div>
+            )}
+
+            {/* 모임 설명 */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p>{meeting.description}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      <div className="mx-auto p-4 max-w-4xl">
+        <Button className="w-full bg-red-500" onClick={handleDeleteMeeting}>
+          삭제
+        </Button>
+      </div>
     </div>
   );
 };
