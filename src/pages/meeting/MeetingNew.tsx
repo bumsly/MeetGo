@@ -17,9 +17,8 @@ import {
   setDoc,
   where,
 } from "firebase/firestore";
-import { auth, db } from "@/firebase";
+import { db } from "@/firebase";
 import { useAuth } from "@/contexts/AuthContext";
-import { fetchSignInMethodsForEmail } from "firebase/auth";
 
 const MeetingNew = () => {
   const navigate = useNavigate();
