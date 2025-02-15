@@ -28,7 +28,7 @@ export interface Meeting {
   description: string;
   deadline: Timestamp;
   isVoteEnabled: boolean;
-  invitees: User[];
+  invitees: Invitee[];
   createdAt: Timestamp;
   createdBy: User;
   participants: Participant[];

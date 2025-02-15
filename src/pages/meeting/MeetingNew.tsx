@@ -276,7 +276,7 @@ const MeetingNew = () => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate("/meeting")}
+                onClick={() => navigate("/")}
                 disabled={isLoading}
               >
                 취소

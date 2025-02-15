@@ -4,17 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import {
-  Timestamp,
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  updateDoc,
-  where,
-} from "firebase/firestore";
-import { Meeting, User } from "@/types/meeting";
+import { Timestamp, doc, getDoc, updateDoc } from "firebase/firestore";
+import { Meeting } from "@/types/meeting";
 import { useNavigate, useParams } from "react-router-dom";
 import { db } from "@/firebase";
 import { inviteUser } from "@/utils/inviteUser";
@@ -94,10 +85,13 @@ const MeetingEdit = () => {
   };
 
   const handleInvite = async () => {
+    if (!meeting) return;
+
     await inviteUser(
       newInviteeEmail,
+      meeting.createdBy.email || "",
       meeting.invitees,
-      setMeeting,
+      (invitees) => setMeeting((prev) => (prev ? { ...prev, invitees } : prev)),
       setInviteError
     );
     setNewInviteeEmail(""); // 입력 필드 초기화
@@ -216,11 +210,12 @@ const MeetingEdit = () => {
               초대
             </Button>
           </div>
+          {inviteError && <p className="text-sm text-red-500">{inviteError}</p>}
 
           <div className="space-y-2">
-            {meeting.invitees.map((invitee) => (
+            {meeting.invitees.map((invitee, index) => (
               <div
-                key={invitee.uid}
+                key={`${invitee.uid}-${index}`}
                 className="flex justify-between items-center bg-gray-100 p-2 rounded"
               >
                 <div>
@@ -247,7 +242,7 @@ const MeetingEdit = () => {
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate(`/meeting/${meeting?.id}`)}
             disabled={!meeting || isSubmitting}
           >
             취소

@@ -7,18 +7,6 @@ export const inviteUser = async (
   hostEmail: string | null,
   currentInvitees: Invitee[],
   onInviteesUpdate: (invitees: Invitee[]) => void,
-  //   setFormData: React.Dispatch<
-  //     React.SetStateAction<{
-  //       title: string;
-  //       date: Date;
-  //       time: string;
-  //       location: string;
-  //       description: string;
-  //       deadline: Date;
-  //       isVoteEnabled: boolean;
-  //       invitees: Invitee[];
-  //     }>
-  //   >,
   setError: (error: string) => void
 ): Promise<void> => {
   // 이메일 입력 확인
