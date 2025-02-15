@@ -6,6 +6,12 @@ export interface User {
   displayName: string | null;
 }
 
+export interface Invitee {
+  uid: string;
+  email: string | null;
+  displayName: string;
+}
+
 export interface Participant {
   uid: string;
   email: string | null;

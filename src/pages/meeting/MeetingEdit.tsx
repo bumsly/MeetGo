@@ -17,6 +17,7 @@ import {
 import { Meeting, User } from "@/types/meeting";
 import { useNavigate, useParams } from "react-router-dom";
 import { db } from "@/firebase";
+import { inviteUser } from "@/utils/inviteUser";
 
 const MeetingEdit = () => {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ const MeetingEdit = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newInviteeEmail, setNewInviteeEmail] = useState("");
+  const [inviteError, setInviteError] = useState("");
 
   useEffect(() => {
     const fetchMeeting = async () => {
@@ -91,40 +93,14 @@ const MeetingEdit = () => {
     }
   };
 
-  const addInvitee = async () => {
-    if (!newInviteeEmail) return;
-
-    try {
-      const usersRef = collection(db, "users");
-      const q = query(usersRef, where("email", "==", newInviteeEmail));
-      const querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) {
-        const userDoc = querySnapshot.docs[0].data() as User;
-
-        setMeeting((prev) =>
-          prev
-            ? {
-                ...prev,
-                inviteees: [
-                  ...prev.invitees,
-                  {
-                    uid: userDoc.uid,
-                    email: userDoc,
-                    displayName: userDoc.displayName || "익명",
-                  },
-                ],
-              }
-            : prev
-        );
-
-        setNewInviteeEmail("");
-      } else {
-        alert("해당 이메일을 가진 사용자가 존재하지 않습니다.");
-      }
-    } catch (error) {
-      console.error("참여자 추가 실패:", error);
-    }
+  const handleInvite = async () => {
+    await inviteUser(
+      newInviteeEmail,
+      meeting.invitees,
+      setMeeting,
+      setInviteError
+    );
+    setNewInviteeEmail(""); // 입력 필드 초기화
   };
 
   const removeInvitee = (uid: string) => {
@@ -236,7 +212,7 @@ const MeetingEdit = () => {
               onChange={(e) => setNewInviteeEmail(e.target.value)}
               placeholder="이메일 주소"
             />
-            <Button type="button" onClick={addInvitee}>
+            <Button type="button" onClick={handleInvite}>
               초대
             </Button>
           </div>

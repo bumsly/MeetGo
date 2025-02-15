@@ -7,18 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import {
-  Timestamp,
-  addDoc,
-  collection,
-  doc,
-  getDocs,
-  query,
-  setDoc,
-  where,
-} from "firebase/firestore";
+import { Timestamp, addDoc, collection, doc, setDoc } from "firebase/firestore";
 import { db } from "@/firebase";
 import { useAuth } from "@/contexts/AuthContext";
+import { inviteUser } from "@/utils/inviteUser";
+import { Invitee } from "@/types/meeting";
 
 const MeetingNew = () => {
   const navigate = useNavigate();
@@ -32,61 +25,27 @@ const MeetingNew = () => {
     description: "",
     deadline: new Date(),
     isVoteEnabled: false,
-    invitees: [] as string[],
+    invitees: [] as Invitee[],
   });
   const [inviteEmail, setInviteEmail] = useState("");
   const [emailError, setEmailError] = useState("");
 
   const handleInvite = async () => {
-    if (!inviteEmail) {
-      setEmailError("이메일을 입력해주세요");
-      return;
-    }
+    await inviteUser(
+      inviteEmail,
+      user?.email || null,
+      formData.invitees,
+      (invitees) => setFormData((prev) => ({ ...prev, invitees })),
+      setEmailError
+    );
 
-    // 이메일 형식 검사
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(inviteEmail)) {
-      setEmailError("이메일 형식이 정확하지 않습니다.");
-      return;
-    }
-
-    // 본인 이메일 추가 불가능
-    if (inviteEmail === user?.email) {
-      setEmailError("본인의 이메일은 초대할 수 없습니다.");
-      return;
-    }
-
-    try {
-      const usersRef = collection(db, "users");
-      const q = query(usersRef, where("email", "==", inviteEmail));
-      const querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) {
-        setEmailError("해당 이메일로 등록된 유저가 없습니다.");
-        return;
-      }
-
-      if (formData.invitees.includes(inviteEmail)) {
-        setEmailError("이미 초대된 이메일입니다.");
-        return;
-      }
-
-      setFormData({
-        ...formData,
-        invitees: [...formData.invitees, inviteEmail],
-      });
-      setInviteEmail("");
-      setEmailError("");
-    } catch (error) {
-      console.log("이메일 조회 에러:", error);
-      setEmailError("이메일 조회 중에 오류가 발생했습니다.");
-    }
+    setInviteEmail("");
   };
 
-  const handleRemoveInvitee = (email: string) => {
+  const handleRemoveInvitee = (uid: string) => {
     setFormData({
       ...formData,
-      invitees: formData.invitees.filter((invitee) => invitee !== email),
+      invitees: formData.invitees.filter((invitee) => invitee.uid !== uid),
     });
   };
 
@@ -99,8 +58,18 @@ const MeetingNew = () => {
       return;
     }
 
+    if (!formData.description.trim()) {
+      alert("모임 설명을 입력해주세요.");
+      return;
+    }
+
     try {
       setIsLoading(true);
+
+      // 날짜 유효성 검사
+      if (!formData.date || !formData.deadline) {
+        throw new Error("모인 날짜와 마감일을 선택해주세요.");
+      }
 
       const [hours, minutes] = formData.time.split(":").map(Number);
       const meetingDate = new Date(formData.date);
@@ -179,7 +148,9 @@ const MeetingNew = () => {
               <Calendar
                 mode="single"
                 selected={formData.date}
-                onSelect={(date) => setFormData({ ...formData, date })}
+                onSelect={(date) =>
+                  setFormData({ ...formData, date: date ?? new Date() })
+                }
                 className="rounded-md border"
               />
             </div>
@@ -241,7 +212,7 @@ const MeetingNew = () => {
                 mode="single"
                 selected={formData.deadline}
                 onSelect={(date) =>
-                  setFormData({ ...formData, deadline: date })
+                  setFormData({ ...formData, deadline: date ?? new Date() })
                 }
                 className="rounded-md border"
               />
@@ -252,7 +223,7 @@ const MeetingNew = () => {
               <Switch
                 id="vote-mode"
                 checked={formData.isVoteEnabled}
-                onCheckedChange={(checked) =>
+                onCheckedChange={(checked: boolean) =>
                   setFormData({ ...formData, isVoteEnabled: checked })
                 }
               />
@@ -279,17 +250,19 @@ const MeetingNew = () => {
 
               {/* 초대된 참여자 목록 */}
               <div className="space-y-2">
-                {formData.invitees.map((email) => (
+                {formData.invitees.map((invitee, index) => (
                   <div
-                    key={email}
+                    key={`${invitee.uid}-${index}`}
                     className="flex items-center justify-between p-2 border rounded-md"
                   >
-                    <span>{email}</span>
+                    <span>
+                      {invitee.displayName} ({invitee.email})
+                    </span>
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleRemoveInvitee(email)}
+                      onClick={() => handleRemoveInvitee(invitee.uid)}
                     >
                       삭제
                     </Button>
@@ -303,7 +276,7 @@ const MeetingNew = () => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate(-1)}
+                onClick={() => navigate("/meeting")}
                 disabled={isLoading}
               >
                 취소
