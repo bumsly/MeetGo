@@ -1,6 +1,7 @@
 import { Timestamp } from "firebase/firestore";
 import { CalendarCheck, Users, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
+import GetDday from "@/components/GetDday";
 
 export default function MeetingCard({ meeting }: any) {
   return (
@@ -12,22 +13,28 @@ export default function MeetingCard({ meeting }: any) {
             {meeting.isVoteEnabled ? "투표 활성화" : "투표 비활성화"}
           </span>
         </div>
-        <div className="flex items-center space-x-2 text-gray-600 mb-2">
-          <CalendarCheck size={16} />
-          <span>
-            {meeting.date instanceof Timestamp
-              ? meeting.date.toDate().toLocaleString()
-              : meeting.date.split("T")[0]}{" "}
-            {meeting.time}
-          </span>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center space-x-2 text-gray-600">
+            <CalendarCheck size={16} />
+            <span>
+              일시:{" "}
+              {meeting.date instanceof Timestamp
+                ? meeting.date.toDate().toLocaleDateString("ko-KR", {
+                    month: "long",
+                    day: "numeric",
+                  })
+                : meeting.date.split("T")[0]}
+            </span>
+          </div>
+          <strong className="ml-2 text-red-600">{GetDday(meeting.date)}</strong>
         </div>
         <div className="flex items-center space-x-2 text-gray-600 mb-2">
           <MapPin size={16} />
-          <span>{meeting.location}</span>
+          <span>장소: {meeting.location}</span>
         </div>
         <div className="flex items-center space-x-2 text-gray-600">
           <Users size={16} />
-          <span>{meeting.participants.length || 0} 명 참여</span>
+          <span>참석: {meeting.participants.length || 0} 명</span>
         </div>
       </Link>
     </div>

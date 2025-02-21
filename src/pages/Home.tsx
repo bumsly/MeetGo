@@ -75,35 +75,12 @@ export default function Home() {
   };
 
   // 📌 모임 필터링 (예정된 모임 / 지난 모임)
-  const upcomingMeetings = meetings.filter(
-    (meeting) => meeting.date >= newTime
-  );
-  const pastMeetings = meetings.filter((meeting) => meeting.date < newTime);
-
-  // useEffect(() => {
-  //   const fetchMeetings = async () => {
-  //     try {
-  //       const querySnapshot = await getDocs(collection(db, "meetings"));
-  //       const meetingsData: Meeting[] = querySnapshot.docs.map((doc) => {
-  //         const data = doc.data();
-
-  //         return {
-  //           id: doc.id,
-  //           title: data.title,
-  //           date:
-  //             data.date instanceof Timestamp
-  //               ? data.date.toDate().toISOString()
-  //               : data.date,
-  //         };
-  //       });
-  //       setMeetings(meetingsData);
-  //     } catch (error) {
-  //       console.error("Error fetching meetings:", error);
-  //     }
-  //   };
-
-  //   fetchMeetings();
-  // }, []);
+  const upcomingMeetings = meetings
+    .filter((meeting) => meeting.date >= newTime)
+    .sort((a, b) => a.date.toDate().getTime() - b.date.toDate().getTime());
+  const pastMeetings = meetings
+    .filter((meeting) => meeting.date < newTime)
+    .sort((a, b) => b.date.toDate().getTime() - a.date.toDate().getTime());
 
   if (isLoading) return <div className="text-center py-20">Loading...</div>;
 

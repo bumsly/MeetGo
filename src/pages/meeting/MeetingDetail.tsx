@@ -4,7 +4,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   doc,
   getDoc,
-  updateDoc,
   arrayUnion,
   arrayRemove,
   Timestamp,
@@ -17,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Calendar, MapPin, Users, UserPlus } from "lucide-react";
 import { Meeting, Participant } from "@/types/meeting";
+import GetDday from "@/components/GetDday";
 
 interface MeetingFirestore extends Omit<Meeting, "id"> {
   // Firebase 문서의 타입
@@ -195,7 +195,7 @@ const MeetingDetail: React.FC = () => {
   const meetingDate = meeting.date.toDate();
 
   return (
-    <div>
+    <div className="pb-24">
       <div className="container mx-auto p-4 max-w-4xl pt-24">
         <Card>
           <CardHeader>
@@ -216,21 +216,24 @@ const MeetingDetail: React.FC = () => {
           <CardContent className="space-y-6">
             {/* 기본 정보 */}
             <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Calendar className="w-5 h-5" />
-                <span>
-                  일시:{" "}
-                  {meetingDate.toLocaleDateString("ko-KR", {
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </span>
-                <span>
-                  {meetingDate.toLocaleTimeString("ko-KR", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
+              <div className="flex justify-between">
+                <div className="flex items-center space-x-2">
+                  <Calendar className="w-5 h-5" />
+                  <span>
+                    일시:{" "}
+                    {meetingDate.toLocaleDateString("ko-KR", {
+                      month: "long",
+                      day: "numeric",
+                    })}{" "}
+                    {meetingDate.toLocaleTimeString("ko-KR", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+                <strong className="ml-2 mr-1 text-red-600">
+                  {GetDday(meeting.date)}
+                </strong>
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin className="w-5 h-5" />
