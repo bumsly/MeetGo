@@ -2,20 +2,20 @@ import { Timestamp } from "firebase/firestore";
 
 export interface User {
   uid: string;
-  email: string | null;
-  displayName: string | null;
+  email: string;
+  displayName: string;
 }
 
 export interface Invitee {
   uid: string;
-  email: string | null;
+  email: string;
   displayName: string;
 }
 
 export interface Participant {
   uid: string;
-  email: string | null;
-  displayName: string | null;
+  email: string;
+  displayName: string;
   role: "host" | "participant";
   joinedAt: Timestamp;
 }

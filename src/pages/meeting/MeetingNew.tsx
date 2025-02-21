@@ -11,7 +11,7 @@ import { Timestamp, addDoc, collection, doc, setDoc } from "firebase/firestore";
 import { db } from "@/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { inviteUser } from "@/utils/inviteUser";
-import { Invitee } from "@/types/meeting";
+import { Invitee, Meeting } from "@/types/meeting";
 
 const MeetingNew = () => {
   const navigate = useNavigate();
@@ -75,7 +75,8 @@ const MeetingNew = () => {
       const meetingDate = new Date(formData.date);
       meetingDate.setHours(hours, minutes, 0, 0);
 
-      const meetingData = {
+      const meetingData: Meeting = {
+        id: "",
         title: formData.title,
         date: Timestamp.fromDate(meetingDate),
         location: formData.location,
@@ -86,14 +87,13 @@ const MeetingNew = () => {
         createdAt: Timestamp.now(),
         createdBy: {
           uid: user.uid,
-          email: user.email,
+          email: user.email || "",
           displayName: user.displayName || "익명",
         },
-        status: "active",
         participants: [
           {
             uid: user.uid,
-            email: user.email,
+            email: user.email || "",
             displayName: user.displayName || "익명",
             role: "host",
             joinedAt: Timestamp.now(),

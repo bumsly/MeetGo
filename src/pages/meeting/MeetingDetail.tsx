@@ -9,6 +9,7 @@ import {
   arrayRemove,
   Timestamp,
   deleteDoc,
+  runTransaction,
 } from "firebase/firestore";
 import { db } from "@/firebase";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -62,8 +63,6 @@ const MeetingDetail: React.FC = () => {
     };
 
     fetchMeetingDetails();
-
-    console.log("meeting participants", meeting?.participants);
   }, [id]);
 
   const handleJoinMeeting = async () => {
@@ -73,25 +72,37 @@ const MeetingDetail: React.FC = () => {
     }
 
     try {
+      const meetingRef = doc(db, "meetings", meeting.id);
+
       const newParticipant: Participant = {
         uid: user.uid,
-        email: user.email,
-        displayName: user.displayName || "익명",
+        email: user.email || "",
+        displayName: user.displayName || "",
         role: "participant",
         joinedAt: Timestamp.now(),
       };
 
-      await updateDoc(doc(db, "meetings", meeting.id), {
-        participants: arrayUnion(newParticipant),
+      await runTransaction(db, async (transaction) => {
+        const meetingDoc = await transaction.get(meetingRef);
+        if (!meetingDoc.exists()) throw new Error("모임이 존재하지 않습니다.");
+
+        transaction.update(meetingRef, {
+          participants: arrayUnion(newParticipant),
+          invitees: arrayRemove(user.email),
+        });
       });
 
-      setMeeting((prev) => {
-        if (!prev) return null;
-        return {
-          ...prev,
-          participants: [...prev.participants, newParticipant],
-        };
-      });
+      setMeeting((prev) =>
+        prev
+          ? {
+              ...prev,
+              participants: [...prev.participants, newParticipant],
+              invitees: prev.invitees.filter(
+                (invitee) => invitee.email !== user.email
+              ),
+            }
+          : null
+      );
 
       alert("모임 참여가 완료되었습니다!");
     } catch (error) {
@@ -104,24 +115,42 @@ const MeetingDetail: React.FC = () => {
     if (!user || !meeting) return;
 
     try {
+      const meetingRef = doc(db, "meetings", meeting.id);
+
       const participant = meeting.participants.find(
         (p: any) => p.uid === user.uid
       );
+
       if (!participant) return;
 
-      await updateDoc(doc(db, "meetings", meeting.id), {
-        participants: arrayRemove(participant),
+      await runTransaction(db, async (transaction) => {
+        const meetingDoc = await transaction.get(meetingRef);
+        if (!meetingDoc.exists()) throw new Error("모임이 존재하지 않습니다.");
+
+        transaction.update(meetingRef, {
+          participants: arrayRemove(participant),
+          invitees: arrayUnion(user.email),
+        });
       });
 
-      setMeeting((prev) => {
-        if (!prev) return null;
-        return {
-          ...prev,
-          participants: prev.participants.filter(
-            (p: any) => p.uid !== user.uid
-          ),
-        };
-      });
+      setMeeting((prev) =>
+        prev
+          ? {
+              ...prev,
+              participants: prev.participants.filter(
+                (participant) => participant.email !== user.email
+              ),
+              invitees: [
+                ...prev.invitees,
+                {
+                  uid: user.uid,
+                  email: user.email || "",
+                  displayName: user.displayName || "",
+                },
+              ],
+            }
+          : null
+      );
 
       alert("모임 참여가 취소되었습니다.");
     } catch (error) {
@@ -277,9 +306,14 @@ const MeetingDetail: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-      <div className="mx-auto p-4 max-w-4xl">
+      <div className="mx-auto p-4 pt-0 max-w-4xl">
         <Button className="w-full bg-red-500" onClick={handleDeleteMeeting}>
           삭제
+        </Button>
+      </div>
+      <div className="mx-auto px-4 max-w-4xl">
+        <Button className="w-full bg-gray-500" onClick={() => navigate(-1)}>
+          뒤로 가기
         </Button>
       </div>
     </div>

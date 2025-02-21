@@ -5,14 +5,17 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import MeetingCard from "@/components/MeetingCard";
 import { Timestamp, collection, getDocs } from "firebase/firestore";
 import { db } from "@/firebase";
+import { Meeting } from "@/types/meeting";
 
-interface Meeting {
-  id: string;
+const QuickActionButton = ({
+  icon,
+  title,
+  to,
+}: {
+  icon: JSX.Element;
   title: string;
-  date: string;
-}
-
-const QuickActionButton = ({ icon, title, to }: any) => (
+  to: string;
+}) => (
   <Link
     to={to}
     className="flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow-md hover:shadow-lg  transition-all"
@@ -23,8 +26,41 @@ const QuickActionButton = ({ icon, title, to }: any) => (
 );
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState("upcoming");
+  const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
   const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const newTime = Timestamp.fromDate(new Date());
+
+  useEffect(() => {
+    const fetchMeetings = async () => {
+      setIsLoading(true);
+      try {
+        const quickSnapshot = await getDocs(collection(db, "meetings"));
+        const meetingsData: Meeting[] = quickSnapshot.docs.map((doc) => {
+          const data = doc.data() as Meeting;
+
+          return {
+            ...data,
+            id: doc.id,
+            date: data.date instanceof Timestamp ? data.date : newTime,
+            deadline:
+              data.deadline instanceof Timestamp ? data.deadline : newTime,
+            createdAt:
+              data.createdAt instanceof Timestamp ? data.createdAt : newTime,
+          };
+        });
+
+        setMeetings(meetingsData);
+      } catch (error) {
+        console.error("모임 데이터를 불러오는데 실패했습니다.", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMeetings();
+  }, []);
 
   const handleCreateMeeting = () => {
     console.log("새 모임 만들기");
@@ -38,40 +74,38 @@ export default function Home() {
     console.log("최근 모임");
   };
 
-  const now = new Date();
-
   // 📌 모임 필터링 (예정된 모임 / 지난 모임)
   const upcomingMeetings = meetings.filter(
-    (meeting) => new Date(meeting.date) >= now
+    (meeting) => meeting.date >= newTime
   );
-  const pastMeetings = meetings.filter(
-    (meeting) => new Date(meeting.date) < now
-  );
+  const pastMeetings = meetings.filter((meeting) => meeting.date < newTime);
 
-  useEffect(() => {
-    const fetchMeetings = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "meetings"));
-        const meetingsData: Meeting[] = querySnapshot.docs.map((doc) => {
-          const data = doc.data();
+  // useEffect(() => {
+  //   const fetchMeetings = async () => {
+  //     try {
+  //       const querySnapshot = await getDocs(collection(db, "meetings"));
+  //       const meetingsData: Meeting[] = querySnapshot.docs.map((doc) => {
+  //         const data = doc.data();
 
-          return {
-            id: doc.id,
-            title: data.title,
-            date:
-              data.date instanceof Timestamp
-                ? data.date.toDate().toISOString()
-                : data.date,
-          };
-        });
-        setMeetings(meetingsData);
-      } catch (error) {
-        console.error("Error fetching meetings:", error);
-      }
-    };
+  //         return {
+  //           id: doc.id,
+  //           title: data.title,
+  //           date:
+  //             data.date instanceof Timestamp
+  //               ? data.date.toDate().toISOString()
+  //               : data.date,
+  //         };
+  //       });
+  //       setMeetings(meetingsData);
+  //     } catch (error) {
+  //       console.error("Error fetching meetings:", error);
+  //     }
+  //   };
 
-    fetchMeetings();
-  }, []);
+  //   fetchMeetings();
+  // }, []);
+
+  if (isLoading) return <div className="text-center py-20">Loading...</div>;
 
   return (
     <div className="h-screen">
@@ -141,18 +175,6 @@ export default function Home() {
                 지난 모임이 없습니다.
               </div>
             )}
-
-            {/* {meetings.length > 0 ? (
-               meetings.map((meeting: Meeting) => (
-                 <MeetingCard key={meeting.id} meeting={meeting} />
-               ))
-             ) : (
-               <div className="text-center text-gray-500 py-8">
-                 {activeTab === "upcoming"
-                   ? "예정된 모임이 없습니다."
-                   : "지난 모임이 없습니다."}
-               </div>
-            )} */}
           </ScrollArea>
         </div>
       </div>

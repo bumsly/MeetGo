@@ -8,7 +8,9 @@ export default function MeetingCard({ meeting }: any) {
       <Link to={`/meeting/${meeting.id}`} className="block">
         <div className="flex justify-between items-center mb-2">
           <h3 className="font-bold text-lg">{meeting.title}</h3>
-          <span className="text-sm text-blue-600">{meeting.status}</span>
+          <span className="text-sm text-blue-600">
+            {meeting.isVoteEnabled ? "투표 활성화" : "투표 비활성화"}
+          </span>
         </div>
         <div className="flex items-center space-x-2 text-gray-600 mb-2">
           <CalendarCheck size={16} />
@@ -25,7 +27,7 @@ export default function MeetingCard({ meeting }: any) {
         </div>
         <div className="flex items-center space-x-2 text-gray-600">
           <Users size={16} />
-          <span>{meeting.participants || 0}명 참여</span>
+          <span>{meeting.participants.length || 0} 명 참여</span>
         </div>
       </Link>
     </div>
