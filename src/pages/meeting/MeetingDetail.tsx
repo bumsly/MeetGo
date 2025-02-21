@@ -88,7 +88,9 @@ const MeetingDetail: React.FC = () => {
 
         transaction.update(meetingRef, {
           participants: arrayUnion(newParticipant),
-          invitees: arrayRemove(user.email),
+          invitees: arrayRemove(
+            meeting.invitees.find((i) => i.email === user.email)
+          ),
         });
       });
 
@@ -129,7 +131,11 @@ const MeetingDetail: React.FC = () => {
 
         transaction.update(meetingRef, {
           participants: arrayRemove(participant),
-          invitees: arrayUnion(user.email),
+          invitees: arrayUnion({
+            uid: user.uid,
+            email: user.email || "",
+            displayName: user.displayName || "",
+          }),
         });
       });
 
@@ -151,7 +157,7 @@ const MeetingDetail: React.FC = () => {
             }
           : null
       );
-
+      console.log(meeting);
       alert("모임 참여가 취소되었습니다.");
     } catch (error) {
       console.error("Error leaving meeting:", error);
@@ -213,8 +219,8 @@ const MeetingDetail: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <Calendar className="w-5 h-5" />
                 <span>
+                  일시:{" "}
                   {meetingDate.toLocaleDateString("ko-KR", {
-                    year: "numeric",
                     month: "long",
                     day: "numeric",
                   })}
@@ -228,7 +234,7 @@ const MeetingDetail: React.FC = () => {
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin className="w-5 h-5" />
-                <span>{meeting.location}</span>
+                <span>장소: {meeting.location}</span>
               </div>
             </div>
 
