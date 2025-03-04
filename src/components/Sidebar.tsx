@@ -20,6 +20,7 @@ const Sidebar = ({ isOpen, setIsOpen, isDarkMode, setIsDarkMode }: any) => {
       setUser(null);
       setUserData(null);
       setIsOpen(false);
+      window.location.reload();
     } catch (error) {
       console.log("로그아웃 에러", error);
     }

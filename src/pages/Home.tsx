@@ -1,11 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Users, PlusCircle, Clock } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { dummy } from "@/assets/Dummy";
 import MeetingCard from "@/components/MeetingCard";
+import { Timestamp, collection, getDocs } from "firebase/firestore";
+import { db } from "@/firebase";
+import { Meeting } from "@/types/meeting";
 
-const QuickActionButton = ({ icon, title, to }: any) => (
+const QuickActionButton = ({
+  icon,
+  title,
+  to,
+}: {
+  icon: JSX.Element;
+  title: string;
+  to: string;
+}) => (
   <Link
     to={to}
     className="flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow-md hover:shadow-lg  transition-all"
@@ -16,7 +26,41 @@ const QuickActionButton = ({ icon, title, to }: any) => (
 );
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState("upcoming");
+  const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
+  const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const newTime = Timestamp.fromDate(new Date());
+
+  useEffect(() => {
+    const fetchMeetings = async () => {
+      setIsLoading(true);
+      try {
+        const quickSnapshot = await getDocs(collection(db, "meetings"));
+        const meetingsData: Meeting[] = quickSnapshot.docs.map((doc) => {
+          const data = doc.data() as Meeting;
+
+          return {
+            ...data,
+            id: doc.id,
+            date: data.date instanceof Timestamp ? data.date : newTime,
+            deadline:
+              data.deadline instanceof Timestamp ? data.deadline : newTime,
+            createdAt:
+              data.createdAt instanceof Timestamp ? data.createdAt : newTime,
+          };
+        });
+
+        setMeetings(meetingsData);
+      } catch (error) {
+        console.error("모임 데이터를 불러오는데 실패했습니다.", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMeetings();
+  }, []);
 
   const handleCreateMeeting = () => {
     console.log("새 모임 만들기");
@@ -29,6 +73,16 @@ export default function Home() {
   const handleRecentMeetings = () => {
     console.log("최근 모임");
   };
+
+  // 📌 모임 필터링 (예정된 모임 / 지난 모임)
+  const upcomingMeetings = meetings
+    .filter((meeting) => meeting.date >= newTime)
+    .sort((a, b) => a.date.toDate().getTime() - b.date.toDate().getTime());
+  const pastMeetings = meetings
+    .filter((meeting) => meeting.date < newTime)
+    .sort((a, b) => b.date.toDate().getTime() - a.date.toDate().getTime());
+
+  if (isLoading) return <div className="text-center py-20">Loading...</div>;
 
   return (
     <div className="h-screen">
@@ -80,8 +134,8 @@ export default function Home() {
         <div className="flex-1 px-4 overflow-hidden pb-[80px]">
           <ScrollArea className="h-full overflow-y-auto pr-2">
             {activeTab === "upcoming" ? (
-              dummy.length > 0 ? (
-                dummy.map((meeting: any) => (
+              upcomingMeetings.length > 0 ? (
+                upcomingMeetings.map((meeting) => (
                   <MeetingCard key={meeting.id} meeting={meeting} />
                 ))
               ) : (
@@ -89,6 +143,10 @@ export default function Home() {
                   예정된 모임이 없습니다.
                 </div>
               )
+            ) : pastMeetings.length > 0 ? (
+              pastMeetings.map((meeting) => (
+                <MeetingCard key={meeting.id} meeting={meeting} />
+              ))
             ) : (
               <div className="text-center text-gray-500 py-8">
                 지난 모임이 없습니다.

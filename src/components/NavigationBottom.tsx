@@ -67,7 +67,7 @@ export default function NavigationBottom() {
         </span>
 
         <span className="w-1/5 flex justify-center">
-          <Link to="/">
+          <Link to="/friend">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"

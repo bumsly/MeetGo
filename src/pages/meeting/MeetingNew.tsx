@@ -8,8 +8,10 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Timestamp, addDoc, collection, doc, setDoc } from "firebase/firestore";
-import { auth, db } from "@/firebase";
+import { db } from "@/firebase";
 import { useAuth } from "@/contexts/AuthContext";
+import { inviteUser } from "@/utils/inviteUser";
+import { Invitee, Meeting } from "@/types/meeting";
 
 const MeetingNew = () => {
   const navigate = useNavigate();
@@ -23,8 +25,29 @@ const MeetingNew = () => {
     description: "",
     deadline: new Date(),
     isVoteEnabled: false,
-    invitees: [],
+    invitees: [] as Invitee[],
   });
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
+
+  const handleInvite = async () => {
+    await inviteUser(
+      inviteEmail,
+      user?.email || null,
+      formData.invitees,
+      (invitees) => setFormData((prev) => ({ ...prev, invitees })),
+      setEmailError
+    );
+
+    setInviteEmail("");
+  };
+
+  const handleRemoveInvitee = (uid: string) => {
+    setFormData({
+      ...formData,
+      invitees: formData.invitees.filter((invitee) => invitee.uid !== uid),
+    });
+  };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -35,14 +58,26 @@ const MeetingNew = () => {
       return;
     }
 
+    if (!formData.description.trim()) {
+      alert("모임 설명을 입력해주세요.");
+      return;
+    }
+
     try {
       setIsLoading(true);
 
-      const [hours, minutes] = formData.time.split(":").map(Number);
+      // 날짜 유효성 검사
+      if (!formData.date || !formData.deadline) {
+        throw new Error("모인 날짜와 마감일을 선택해주세요.");
+      }
+
+      const [hours, minutes] = formData.time
+        ? formData.time.split(":").map(Number)
+        : [0, 0];
       const meetingDate = new Date(formData.date);
       meetingDate.setHours(hours, minutes, 0, 0);
 
-      const meetingData = {
+      const meetingData: Omit<Meeting, "id"> = {
         title: formData.title,
         date: Timestamp.fromDate(meetingDate),
         location: formData.location,
@@ -53,14 +88,13 @@ const MeetingNew = () => {
         createdAt: Timestamp.now(),
         createdBy: {
           uid: user.uid,
-          email: user.email,
+          email: user.email || "",
           displayName: user.displayName || "익명",
         },
-        status: "active",
         participants: [
           {
             uid: user.uid,
-            email: user.email,
+            email: user.email || "",
             displayName: user.displayName || "익명",
             role: "host",
             joinedAt: Timestamp.now(),
@@ -69,12 +103,6 @@ const MeetingNew = () => {
       };
 
       const meetingRef = await addDoc(collection(db, "meetings"), meetingData);
-
-      await setDoc(doc(db, "users", user.uid, "meetings", meetingRef.id), {
-        meetingId: meetingRef.id,
-        role: "host",
-        joinedAt: Timestamp.now(),
-      });
 
       alert("모임이 성공적으로 생성되었습니다!");
       navigate(`/meeting/${meetingRef.id}`);
@@ -115,7 +143,9 @@ const MeetingNew = () => {
               <Calendar
                 mode="single"
                 selected={formData.date}
-                onSelect={(date) => setFormData({ ...formData, date })}
+                onSelect={(date) =>
+                  setFormData({ ...formData, date: date ?? new Date() })
+                }
                 className="rounded-md border"
               />
             </div>
@@ -177,7 +207,7 @@ const MeetingNew = () => {
                 mode="single"
                 selected={formData.deadline}
                 onSelect={(date) =>
-                  setFormData({ ...formData, deadline: date })
+                  setFormData({ ...formData, deadline: date ?? new Date() })
                 }
                 className="rounded-md border"
               />
@@ -188,7 +218,7 @@ const MeetingNew = () => {
               <Switch
                 id="vote-mode"
                 checked={formData.isVoteEnabled}
-                onCheckedChange={(checked) =>
+                onCheckedChange={(checked: boolean) =>
                   setFormData({ ...formData, isVoteEnabled: checked })
                 }
               />
@@ -199,12 +229,41 @@ const MeetingNew = () => {
             <div className="space-y-2">
               <Label>참여자 초대</Label>
               <div className="flex space-x-2">
-                <Input placeholder="이메일 주소 입력" className="flex-1" />
-                <Button type="button" variant="outline">
+                <Input
+                  placeholder="이메일 주소 입력"
+                  className="flex-1"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                />
+                <Button type="button" variant="outline" onClick={handleInvite}>
                   추가
                 </Button>
               </div>
-              {/* 초대된 참여자 목록이 여기에 표시될 예정 */}
+              {emailError && (
+                <p className="text-sm text-red-500">{emailError}</p>
+              )}
+
+              {/* 초대된 참여자 목록 */}
+              <div className="space-y-2">
+                {formData.invitees.map((invitee, index) => (
+                  <div
+                    key={`${invitee.uid}-${index}`}
+                    className="flex items-center justify-between p-2 border rounded-md"
+                  >
+                    <span>
+                      {invitee.displayName} ({invitee.email})
+                    </span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemoveInvitee(invitee.uid)}
+                    >
+                      삭제
+                    </Button>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* 제출 버튼 */}
@@ -212,7 +271,7 @@ const MeetingNew = () => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate(-1)}
+                onClick={() => navigate("/")}
                 disabled={isLoading}
               >
                 취소
