@@ -15,6 +15,7 @@ import MeetingDetail from "./pages/meeting/MeetingDetail";
 import MeetingResult from "./pages/meeting/MeetingResult";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Friend from "./pages/friend/Friend";
 import Notification from "./pages/Notification";
 
 function Layout() {
@@ -46,6 +47,7 @@ function Layout() {
         <Route path="/meeting/:id" element={<MeetingDetail />} />
         <Route path="/meeting/:id/edit" element={<MeetingEdit />} />
         <Route path="/meeting/:id/result" element={<MeetingResult />} />
+        <Route path="/friend" element={<Friend />} />
         <Route path="/notification" element={<Notification />} />
       </Routes>
       {showNavi && <NavigationBottom />}

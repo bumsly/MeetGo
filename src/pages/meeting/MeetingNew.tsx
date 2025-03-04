@@ -71,12 +71,13 @@ const MeetingNew = () => {
         throw new Error("모인 날짜와 마감일을 선택해주세요.");
       }
 
-      const [hours, minutes] = formData.time.split(":").map(Number);
+      const [hours, minutes] = formData.time
+        ? formData.time.split(":").map(Number)
+        : [0, 0];
       const meetingDate = new Date(formData.date);
       meetingDate.setHours(hours, minutes, 0, 0);
 
-      const meetingData: Meeting = {
-        id: "",
+      const meetingData: Omit<Meeting, "id"> = {
         title: formData.title,
         date: Timestamp.fromDate(meetingDate),
         location: formData.location,
@@ -102,12 +103,6 @@ const MeetingNew = () => {
       };
 
       const meetingRef = await addDoc(collection(db, "meetings"), meetingData);
-
-      await setDoc(doc(db, "users", user.uid, "meetings", meetingRef.id), {
-        meetingId: meetingRef.id,
-        role: "host",
-        joinedAt: Timestamp.now(),
-      });
 
       alert("모임이 성공적으로 생성되었습니다!");
       navigate(`/meeting/${meetingRef.id}`);

@@ -110,16 +110,21 @@ const MeetingEdit = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!meeting || !id) {
+      console.error("Error: meeting이나 id가 없습니다.");
+      return;
+    }
     setIsSubmitting(true);
 
     try {
       // 파이어베이스에 id의 업데이트는 필요 없음.
       const { id, ...meetingData } = meeting;
       const docRef = doc(db, "meetings", id);
+
       await updateDoc(docRef, meetingData);
       navigate(`/meeting/${id}`);
     } catch (error) {
-      console.error("Error adding meeting:", error);
+      console.error("Error updating meeting:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -166,9 +171,9 @@ const MeetingEdit = () => {
             <Calendar
               mode="single"
               selected={
-                meeting.date instanceof Timestamp
-                  ? meeting.date.toDate()
-                  : meeting.date
+                meeting.deadline instanceof Timestamp
+                  ? meeting.deadline.toDate()
+                  : meeting.deadline
               }
               onSelect={handleDeadlineChange}
               className="rounded-md border"
@@ -187,7 +192,7 @@ const MeetingEdit = () => {
 
         <div className="flex items-center space-x-2">
           <Switch
-            checked={meeting.isVoteEnabled}
+            checked={meeting.isVoteEnabled ?? false}
             onCheckedChange={(checked) =>
               setMeeting((prev) =>
                 prev ? { ...prev, isVoteEnabled: checked } : prev
@@ -242,7 +247,7 @@ const MeetingEdit = () => {
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate(`/meeting/${meeting?.id}`)}
+            onClick={() => navigate(`/meeting/${meeting.id}`)}
             disabled={!meeting || isSubmitting}
           >
             취소
